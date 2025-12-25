@@ -373,29 +373,25 @@ if data["參考一評分"] in ["普通", "不佳"]:
                 if s_mt: 
                     # 第 373 行：這裡必須縮進 4 個空格！
                     if st.button("提交建議資料", key=f"send_mt_{idx}"):
-                        try:
-                            # 內部的 try 區塊也要繼續往右縮進
+ try:
+                            # 1. 讀取資料
                             existing_df = conn.read(ttl=0)
-                            # ... 寫入 Google Sheets 的邏輯 ...
-                            st.toast("✅ 成功同步！")
-                            st.rerun()
-                        except Exception as e:
-                            st.error(f"錯誤: {e}")
-        
-        # 2. 準備新資料
-        new_row = pd.DataFrame([{
-            "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "原文": data["原文"],
-            "參考一結果": data["參考一結果"],
-            "參考一評分": data["參考一評分"],
-            "參考一建議": s_mt,
-            "參考二結果": data["參考二結果"],
-            "參考二評分": data.get("參考二評分", ""),
-            "參考二建議": data.get("參考二建議", "")
-        }])
-        
-        # 3. 合併
-        updated_df = pd.concat([existing_df, new_row], ignore_index=True)
+                            
+                            # 2. 定義新資料 (確保每一個欄位都與外層對齊)
+                            new_row = pd.DataFrame([{
+                                "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "原文": data["原文"],
+                                "參考一結果": data["參考一結果"],
+                                "參考一評分": data["參考一評分"],
+                                "參考一建議": s_mt,
+                                "參考二結果": data["參考二結果"],
+                                "參考二評分": data.get("參考二評分", ""),
+                                "參考二建議": data.get("參考二建議", "")
+                            }])
+                            
+                            # 3. 合併與更新
+                            updated_df = pd.concat([existing_df, new_row], ignore_index=True)
+                            conn.update(data=updated_df)
         
         # 4. 寫回雲端 (這是最容易失敗的地方)
         conn.update(data=updated_df)
@@ -468,6 +464,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
