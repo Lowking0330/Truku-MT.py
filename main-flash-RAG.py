@@ -336,106 +336,120 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                 st.session_state.current_idx = len(st.session_state.translation_history) - 1
 
 # ==========================================
-    # 7. 持久渲染區：結果顯示與回饋建議
-    # ==========================================
-    if st.session_state.current_idx is not None:
-        idx = st.session_state.current_idx
-        data = st.session_state.translation_history[idx]
+# 7. 持久渲染區：結果顯示與回饋建議 (絕對完整)
+# ==========================================
+if st.session_state.current_idx is not None:
+    idx = st.session_state.current_idx
+    data = st.session_state.translation_history[idx]
+    
+    col_l, col_r = st.columns(2)
+    
+    # --- 左側：參考翻譯一 ---
+    with col_l:
+        st.markdown("### 🏗️ 參考翻譯一")
+        st.markdown(f'<div class="result-text mt-box">{data["參考一結果"]}</div>', unsafe_allow_html=True)
         
-        col_l, col_r = st.columns(2)
-        
-        # --- 左側：參考翻譯一 ---
-        with col_l:
-            st.markdown("### 🏗️ 參考翻譯一")
-            st.markdown(f'<div class="result-text mt-box">{data["參考一結果"]}</div>', unsafe_allow_html=True)
-            
-            # 評分按鈕
-            b1, b2, b3, b4, b5 = st.columns([1, 3, 3, 3, 1])
-            with b2:
-                if st.button("👍 優質", key=f"mt1_{idx}"):
-                    st.session_state.translation_history[idx]["參考一評分"] = "優質"
-                    st.rerun()
-            with b3:
-                if st.button("😐 普通", key=f"mt2_{idx}"):
-                    st.session_state.translation_history[idx]["參考一評分"] = "普通"
-                    st.rerun()
-            with b4:
-                if st.button("❌ 不佳", key=f"mt3_{idx}"):
-                    st.session_state.translation_history[idx]["參考一評分"] = "不佳"
-                    st.rerun()
+        # 評分按鈕
+        b1, b2, b3, b4, b5 = st.columns([1, 3, 3, 3, 1])
+        with b2: 
+            if st.button("👍 優質", key=f"mt1_{idx}"):
+                st.session_state.translation_history[idx]["參考一評分"] = "優質"
+                st.rerun()
+        with b3: 
+            if st.button("😐 普通", key=f"mt2_{idx}"):
+                st.session_state.translation_history[idx]["參考一評分"] = "普通"
+                st.rerun()
+        with b4: 
+            if st.button("❌ 不佳", key=f"mt3_{idx}"):
+                st.session_state.translation_history[idx]["參考一評分"] = "不佳"
+                st.rerun()
 
-            # --- 回復原本邏輯：點擊「普通」或「不佳」才出現框 ---
-            if data.get("參考一評分") in ["普通", "不佳"]:
-                if not st.session_state.get(f"submitted_mt_{idx}", False):
-                    s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
+        # 核心邏輯：維持您原本的判斷流程
+        if data["參考一評分"] in ["普通", "不佳"]:
+            if not st.session_state.get(f"submitted_mt_{idx}", False):
+                s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
+                if s_mt:
                     if st.button("提交建議資料", key=f"send_mt_{idx}"):
-                        if s_mt:
-                            try:
-                                # 讀取並寫入 Google Sheets
-                                existing_df = conn.read(ttl=0)
-                                new_row = pd.DataFrame([{
-                                    "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                    "原文": data["原文"],
-                                    "參考一結果": data["參考一結果"],
-                                    "參考一評分": data["參考一評分"],
-                                    "參考一建議": s_mt,
-                                    "參考二結果": data["參考二結果"],
-                                    "參考二評分": data.get("參考二評分", ""),
-                                    "參考二建議": ""
-                                }])
-                                updated_df = pd.concat([existing_df, new_row], ignore_index=True)
-                                conn.update(data=updated_df)
-                                st.session_state[f"submitted_mt_{idx}"] = True
-                                st.toast("✅ 建議已記錄至雲端看板！")
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"同步出錯: {e}")
-                else:
-                    st.success("✅ 謝謝您的建議！已成功記錄。")
+                        try:
+                            # --- 這裡是新增的寫入邏輯，其餘不變 ---
+                            existing_df = conn.read(ttl=0)
+                            new_row = pd.DataFrame([{
+                                "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "原文": data["原文"],
+                                "參考一結果": data["參考一結果"],
+                                "參考一評分": data["參考一評分"],
+                                "參考一建議": s_mt,
+                                "參考二結果": data["參考二結果"],
+                                "參考二評分": data.get("參考二評分", ""),
+                                "參考二建議": ""
+                            }])
+                            updated_df = pd.concat([existing_df, new_row], ignore_index=True)
+                            conn.update(data=updated_df)
+                            
+                            # --- 原本的狀態更新 ---
+                            st.session_state.translation_history[idx]["參考一建議"] = s_mt
+                            st.session_state[f"submitted_mt_{idx}"] = True
+                            st.toast("✅ 建議已記錄並同步雲端")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"同步出錯：{e}")
+            else:
+                st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的建議！已成功存入記錄。</p>', unsafe_allow_html=True)
 
-        # --- 右側：參考翻譯二 ---
-        with col_r:
-            st.markdown("### ✨ 參考翻譯二")
-            st.markdown(f'<div class="result-text gemini-box">{data["參考二結果"]}</div>', unsafe_allow_html=True)
-            
-            g1, g2, g3, g4, g5 = st.columns([1, 3, 3, 3, 1])
-            with g2:
-                if st.button("👍 優質", key=f"g1_{idx}"):
-                    st.session_state.translation_history[idx]["參考二評分"] = "優質"
-                    st.rerun()
-            with g3:
-                if st.button("😐 普通", key=f"g2_{idx}"):
-                    st.session_state.translation_history[idx]["參考二評分"] = "普通"
-                    st.rerun()
-            with g4:
-                if st.button("❌ 不佳", key=f"g3_{idx}"):
-                    st.session_state.translation_history[idx]["參考二評分"] = "不佳"
-                    st.rerun()
+    # --- 右側：參考翻譯二 ---
+    with col_r:
+        st.markdown("### ✨ 參考翻譯二")
+        st.markdown(f'<div class="result-text gemini-box">{data["參考二結果"]}</div>', unsafe_allow_html=True)
+        
+        g1, g2, g3, g4, g5 = st.columns([1, 3, 3, 3, 1])
+        with g2:
+            if st.button("👍 優質", key=f"g1_{idx}"):
+                st.session_state.translation_history[idx]["參考二評分"] = "優質"
+                st.rerun()
+        with g3:
+            if st.button("😐 普通", key=f"g2_{idx}"):
+                st.session_state.translation_history[idx]["參考二評分"] = "普通"
+                st.rerun()
+        with g4:
+            if st.button("❌ 不佳", key=f"g3_{idx}"):
+                st.session_state.translation_history[idx]["參考二評分"] = "不佳"
+                st.rerun()
 
-            # --- 回復原本邏輯：點擊「普通」或「不佳」才出現框 ---
-            if data.get("參考二評分") in ["普通", "不佳"]:
-                if not st.session_state.get(f"submitted_gm_{idx}", False):
-                    s_gm = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_gm_{idx}")
+        if data["參考二評分"] in ["普通", "不佳"]:
+            if not st.session_state.get(f"submitted_gm_{idx}", False):
+                s_gm = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_gm_{idx}")
+                if s_gm:
                     if st.button("提交建議資料", key=f"send_gm_{idx}"):
-                        if s_gm:
-                            try:
-                                existing_df = conn.read(ttl=0)
-                                new_row = pd.DataFrame([{
-                                    "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                    "原文": data["原文"],
-                                    "參考一結果": data["參考一結果"],
-                                    "參考一評分": data.get("參考一評分", ""),
-                                    "參考一建議": "",
-                                    "參考二結果": data["參考二結果"],
-                                    "參考二評分": data["參考二評分"],
-                                    "參考二建議": s_gm
-                                }])
-                                updated_df = pd.concat([existing_df, new_row], ignore_index=True)
-                                conn.update(data=updated_df)
-                                st.session_state[f"submitted_gm_{idx}"] = True
-                                st.toast("✅ 建議已記錄至雲端看板！")
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"同步出錯: {e}")
-                else:
-                    st.success("✅ 謝謝您的建議！已成功記錄 Mhuway su balay!")
+                        try:
+                            # --- 這裡是新增的寫入邏輯 ---
+                            existing_df = conn.read(ttl=0)
+                            new_row = pd.DataFrame([{
+                                "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "原文": data["原文"],
+                                "參考一結果": data["參考一結果"],
+                                "參考一評分": data.get("參考一評分", ""),
+                                "參考一建議": data.get("參考一建議", ""),
+                                "參考二結果": data["參考二結果"],
+                                "參考二評分": data["參考二評分"],
+                                "參考二建議": s_gm
+                            }])
+                            updated_df = pd.concat([existing_df, new_row], ignore_index=True)
+                            conn.update(data=updated_df)
+                            
+                            st.session_state.translation_history[idx]["參考二建議"] = s_gm
+                            st.session_state[f"submitted_gm_{idx}"] = True
+                            st.toast("✅ 建議已記錄並同步雲端")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"同步出錯：{e}")
+            else:
+                st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄 Mhuway su balay!</p>', unsafe_allow_html=True)
+
+# ==========================================
+# 8. 隱私聲明宣告 (底部)
+# ==========================================
+st.markdown("""
+    <div class="privacy-box">
+        <b>📢 隱私聲明：</b> 您的翻譯請求與回饋將被記錄，僅用於太魯閣語復振與 RAG 系統提升，不會洩漏個人隱私。
+    </div>
+""", unsafe_allow_html=True)
