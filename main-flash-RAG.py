@@ -373,8 +373,8 @@ if data["參考一評分"] in ["普通", "不佳"]:
                 if s_mt: 
                     # 第 373 行：這裡必須縮進 4 個空格！
                     if st.button("提交建議資料", key=f"send_mt_{idx}"):
- try:
-                            # 1. 讀取資料
+
+                        # 1. 讀取資料
                             existing_df = conn.read(ttl=0)
                             
                             # 2. 定義新資料 (確保每一個欄位都與外層對齊)
@@ -464,6 +464,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
