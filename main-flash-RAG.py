@@ -408,8 +408,8 @@ with col_r:
     st.markdown("### ✨ 參考翻譯二")
     st.markdown(f'<div class="result-text gemini-box">{data["參考二結果"]}</div>', unsafe_allow_html=True)
         
-            g1, g2, g3, g4, g5 = st.columns([1, 3, 3, 3, 1])
-        with g2:
+    g1, g2, g3, g4, g5 = st.columns([1, 3, 3, 3, 1])
+    with g2:
             if st.button("👍 優質", key=f"g1_{idx}"):
                 st.session_state.translation_history[idx]["參考二評分"] = "優質"
                 st.rerun()
@@ -459,6 +459,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
