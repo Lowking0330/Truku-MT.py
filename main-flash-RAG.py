@@ -342,7 +342,6 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
         idx = st.session_state.current_idx
         data = st.session_state.translation_history[idx]
         
-        # 定義雙欄位
         col_l, col_r = st.columns(2)
         
         # --- 左側：參考翻譯一 ---
@@ -365,20 +364,23 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                     st.session_state.translation_history[idx]["參考一評分"] = "不佳"
                     st.rerun()
 
-            # 提交建議邏輯
-            if data.get("參考一評分") in ["普通", "不佳"]:
+            # --- 重點：提交建議選項 ---
+            # 只有在有點選評分，且不是「優質」的情況下顯示輸入框
+            current_rating_1 = data.get("參考一評分")
+            if current_rating_1 in ["普通", "不佳"]:
                 if not st.session_state.get(f"submitted_mt_{idx}", False):
+                    # 顯示輸入框
                     s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
-                    if s_mt:
-                        if st.button("提交建議資料", key=f"send_mt_{idx}"):
+                    # 顯示提交按鈕
+                    if st.button("提交建議資料", key=f"send_mt_{idx}"):
+                        if s_mt: # 確保有填寫內容才送出
                             try:
-                                # 寫入雲端
                                 existing_df = conn.read(ttl=0)
                                 new_row = pd.DataFrame([{
                                     "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                     "原文": data["原文"],
                                     "參考一結果": data["參考一結果"],
-                                    "參考一評分": data["參考一評分"],
+                                    "參考一評分": current_rating_1,
                                     "參考一建議": s_mt,
                                     "參考二結果": data["參考二結果"],
                                     "參考二評分": data.get("參考二評分", ""),
@@ -386,13 +388,13 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                                 }])
                                 updated_df = pd.concat([existing_df, new_row], ignore_index=True)
                                 conn.update(data=updated_df)
-                                # 更新狀態
-                                st.session_state.translation_history[idx]["參考一建議"] = s_mt
                                 st.session_state[f"submitted_mt_{idx}"] = True
-                                st.toast("✅ 成功同步至雲端！")
+                                st.toast("✅ 建議已同步！")
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"同步出錯: {e}")
+                        else:
+                            st.warning("請先輸入建議內容再提交。")
                 else:
                     st.success("✅ 謝謝您的建議！已成功記錄。")
 
@@ -401,7 +403,6 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
             st.markdown("### ✨ 參考翻譯二")
             st.markdown(f'<div class="result-text gemini-box">{data["參考二結果"]}</div>', unsafe_allow_html=True)
             
-            # 評分按鈕
             g1, g2, g3, g4, g5 = st.columns([1, 3, 3, 3, 1])
             with g2:
                 if st.button("👍 優質", key=f"g1_{idx}"):
@@ -416,14 +417,14 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                     st.session_state.translation_history[idx]["參考二評分"] = "不佳"
                     st.rerun()
 
-            # 提交建議邏輯
-            if data.get("參考二評分") in ["普通", "不佳"]:
+            # --- 重點：提交建議選項 ---
+            current_rating_2 = data.get("參考二評分")
+            if current_rating_2 in ["普通", "不佳"]:
                 if not st.session_state.get(f"submitted_gm_{idx}", False):
                     s_gm = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_gm_{idx}")
-                    if s_gm:
-                        if st.button("提交建議資料", key=f"send_gm_{idx}"):
+                    if st.button("提交建議資料", key=f"send_gm_{idx}"):
+                        if s_gm:
                             try:
-                                # 寫入雲端
                                 existing_df = conn.read(ttl=0)
                                 new_row = pd.DataFrame([{
                                     "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -432,27 +433,18 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                                     "參考一評分": data.get("參考一評分", ""),
                                     "參考一建議": data.get("參考一建議", ""),
                                     "參考二結果": data["參考二結果"],
-                                    "參考二評分": data["參考二評分"],
+                                    "參考二評分": current_rating_2,
                                     "參考二建議": s_gm
                                 }])
                                 updated_df = pd.concat([existing_df, new_row], ignore_index=True)
                                 conn.update(data=updated_df)
-                                # 更新狀態
-                                st.session_state.translation_history[idx]["參考二建議"] = s_gm
                                 st.session_state[f"submitted_gm_{idx}"] = True
-                                st.toast("✅ 成功同步至雲端！")
+                                st.toast("✅ 建議已同步！")
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"同步出錯: {e}")
+                        else:
+                            st.warning("請先輸入建議內容再提交。")
                 else:
                     st.success("✅ 謝謝您的建議！已成功記錄。")
-
-# ==========================================
-# 8. 隱私聲明宣告 (底部) - 確保這部分不縮進
-# ==========================================
-st.markdown("""
-    <div class="privacy-box">
-        <b>📢 隱私聲明：</b> 您的翻譯請求與回饋將被記錄，僅用於太魯閣語復振與 RAG 系統提升，不會洩漏個人隱私。
-    </div>
-""", unsafe_allow_html=True)
 
