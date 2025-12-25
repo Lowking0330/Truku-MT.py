@@ -237,17 +237,20 @@ def update_score(idx, target, score_val):
 # ==========================================
 st.title("🏔️ 太魯閣族語AI翻譯平臺")
 
+# 在側邊欄顯示看板的部分
 with st.sidebar:
     st.header("📈 社群貢獻看板")
     try:
-        # 從雲端試算表讀取所有已有的建議
-        existing_data = conn.read(ttl=0) # ttl=0 確保每次都讀取最新資料
-        total_suggestions = len(existing_data)
-    except:
+        # ttl=0 是關鍵，它會強制每次都去 Google Sheets 抓最新的
+        existing_data = conn.read(ttl=0) 
+        if existing_data is not None:
+            total_suggestions = len(existing_data)
+        else:
+            total_suggestions = 0
+    except Exception as e:
         total_suggestions = 0
         
     st.metric(label="全社群累計建議數", value=total_suggestions)
-    st.caption("這是一個永久累計的數字，感謝您寶貴的建議！")
     
     st.divider()
     st.header("📋 歷史管理")
@@ -449,6 +452,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
