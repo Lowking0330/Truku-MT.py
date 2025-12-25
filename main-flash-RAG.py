@@ -358,10 +358,10 @@ if data["參考一評分"] in ["普通", "不佳"]:
                 if s_mt:
                  if st.button("提交建議資料", key=f"send_mt_{idx}"):
     # 讀取雲端現有資料 (確保統計數字正確)
-    try:
-        existing_data = conn.read(ttl=0)
-    except:
-        existing_data = pd.DataFrame()
+                    try:
+                    existing_data = conn.read(ttl=0)
+                    except:
+                    existing_data = pd.DataFrame()
 
     new_row = pd.DataFrame([{
         "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -443,6 +443,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
