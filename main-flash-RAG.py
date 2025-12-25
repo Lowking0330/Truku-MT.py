@@ -32,7 +32,7 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 # ==========================================
 try:
     # 這裡 ttl=0 是關鍵，確保每次重新整理都會去 Google Sheets 數一次總列數
-    df_for_count = conn.read(ttl=0) 
+    df_for_count = conn.read(ttl=60) 
     total_contributions = len(df_for_count)
     
     with st.sidebar:
@@ -465,6 +465,7 @@ if st.session_state.current_idx is not None:
     # 這會告訴我們是哪種類型的錯誤（例如：SpreadsheetNotFound 或 PermissionError）
             else:
                 st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄 Mhuway su balay!</p>', unsafe_allow_html=True)
+
 
 
 
