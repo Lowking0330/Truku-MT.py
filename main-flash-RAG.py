@@ -366,14 +366,21 @@ if st.session_state.current_idx is not None:
                 st.rerun()
 
         # 核心邏輯：當評分為普通或不佳，且「尚未送出建議」時，顯示輸入框
-    if data["參考一評分"] in ["普通", "不佳"]:
+if data["參考一評分"] in ["普通", "不佳"]:
             if not st.session_state.get(f"submitted_mt_{idx}", False):
                 s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
-                if s_mt:
+                # 第 372 行：這是父層 if
+                if s_mt: 
+                    # 第 373 行：這裡必須縮進 4 個空格！
                     if st.button("提交建議資料", key=f"send_mt_{idx}"):
                         try:
-        # 1. 抓取最新資料
-        existing_df = conn.read(ttl=0)
+                            # 內部的 try 區塊也要繼續往右縮進
+                            existing_df = conn.read(ttl=0)
+                            # ... 寫入 Google Sheets 的邏輯 ...
+                            st.toast("✅ 成功同步！")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"錯誤: {e}")
         
         # 2. 準備新資料
         new_row = pd.DataFrame([{
@@ -461,6 +468,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
