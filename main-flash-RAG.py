@@ -397,7 +397,7 @@ if data["參考一評分"] in ["普通", "不佳"]:
                             conn.update(data=updated_df)
         
         # --- 如果跑完上面都沒錯，才執行以下動作 ---
-                                st.session_state.translation_history[idx]["參考一建議"] = s_mt
+                                st.session_state.translation_history[idx]["參考一建議"] = s_mt:
                                 st.session_state[f"submitted_mt_{idx}"] = True
                                 st.toast("✅ 成功寫入雲端！")
                                 st.rerun()
@@ -449,7 +449,7 @@ if data["參考一評分"] in ["普通", "不佳"]:
                         except Exception as e:
                             st.error(f"雲端寫入失敗: {e}")
 
-                        st.session_state.translation_history[idx]["參考二建議"] = s_gm
+                        st.session_state.translation_history[idx]["參考二建議"] = s_gm:
                         st.session_state[f"submitted_gm_{idx}"] = True
                         st.toast("✅ 建議二已同步至雲端！")
                         st.rerun()
@@ -464,6 +464,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
