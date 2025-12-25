@@ -1,15 +1,4 @@
-from streamlit_gsheets import GSheetsConnection
-
-# 初始化 Google Sheets 連線
-conn = st.connection("gsheets", type=GSheetsConnection)
 import streamlit as st
-import streamlit as st
-from streamlit_gsheets import GSheetsConnection  # 必須加入這一行！
-import pandas as pd
-from datetime import datetime
-
-# 初始化連線
-conn = st.connection("gsheets", type=GSheetsConnection)
 from google import genai 
 from gradio_client import Client
 import os
@@ -18,6 +7,28 @@ import io
 import re
 from datetime import datetime
 from dotenv import load_dotenv
+from streamlit_gsheets import GSheetsConnection  # <--- 確保這行有加
+
+# ==========================================
+# 1. 環境設定與安全金鑰讀取
+# ==========================================
+load_dotenv()
+
+def get_api_key():
+    try:
+        if "GOOGLE_API_KEY" in st.secrets:
+            return st.secrets["GOOGLE_API_KEY"]
+    except:
+        pass
+    return os.getenv("GOOGLE_API_KEY")
+
+GOOGLE_API_KEY = get_api_key()
+
+# --- 初始化 Google Sheets 連線 ---
+# 確保這一行在 get_api_key 之後，且有加上 type=GSheetsConnection
+conn = st.connection("gsheets", type=GSheetsConnection) 
+
+st.set_page_config(page_title="太魯閣族語AI翻譯平臺", layout="wide")
 
 # ==========================================
 # 1. 環境設定與安全金鑰讀取
@@ -438,6 +449,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
