@@ -413,11 +413,11 @@ with col_r:
             if st.button("👍 優質", key=f"g1_{idx}"):
                 st.session_state.translation_history[idx]["參考二評分"] = "優質"
                 st.rerun()
-        with g3:
+    with g3:
             if st.button("😐 普通", key=f"g2_{idx}"):
                 st.session_state.translation_history[idx]["參考二評分"] = "普通"
                 st.rerun()
-        with g4:
+    with g4:
             if st.button("❌ 不佳", key=f"g3_{idx}"):
                 st.session_state.translation_history[idx]["參考二評分"] = "不佳"
                 st.rerun()
@@ -459,6 +459,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
