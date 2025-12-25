@@ -449,7 +449,7 @@ st.session_state[f"submitted_gm_{idx}"] = True
 st.toast("✅ 建議二已同步至雲端！")
 st.rerun()
             else:
-st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄。</p>', unsafe_allow_html=True)
+                st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄。</p>', unsafe_allow_html=True)
 # ==========================================
 # 8. 隱私聲明宣告 (底部)
 # ==========================================
@@ -459,6 +459,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
