@@ -370,29 +370,38 @@ if st.session_state.current_idx is not None:
             if not st.session_state.get(f"submitted_mt_{idx}", False):
                 s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
                 if s_mt:
-                    if st.button("提交建議資料", key=f"send_mt_{idx}"):
-                        # 這裡的 try 必須與上面的代碼保持 4 個空格的對應縮進
-                        try:
-                            existing_data = conn.read(ttl=0)
-                            new_row = pd.DataFrame([{
-                                "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                "原文": data["原文"],
-                                "參考一結果": data["參考一結果"],
-                                "參考一評分": data["參考一評分"],
-                                "參考一建議": s_mt,
-                                "參考二結果": data["參考二結果"],
-                                "參考二評分": data.get("參考二評分", ""),
-                                "參考二建議": data.get("參考二建議", "")
-                            }])
-                            updated_df = pd.concat([existing_data, new_row], ignore_index=True)
-                            conn.update(data=updated_df)
-                        except Exception as e:
-                            st.error(f"雲端寫入失敗: {e}")
-
-                        st.session_state.translation_history[idx]["參考一建議"] = s_mt
-                        st.session_state[f"submitted_mt_{idx}"] = True
-                        st.toast("✅ 建議一已同步至雲端！")
-                        st.rerun()
+if st.button("提交建議資料", key=f"send_mt_{idx}"):
+    try:
+        # 1. 抓取最新資料
+        existing_df = conn.read(ttl=0)
+        
+        # 2. 準備新資料
+        new_row = pd.DataFrame([{
+            "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "原文": data["原文"],
+            "參考一結果": data["參考一結果"],
+            "參考一評分": data["參考一評分"],
+            "參考一建議": s_mt,
+            "參考二結果": data["參考二結果"],
+            "參考二評分": data.get("參考二評分", ""),
+            "參考二建議": data.get("參考二建議", "")
+        }])
+        
+        # 3. 合併
+        updated_df = pd.concat([existing_df, new_row], ignore_index=True)
+        
+        # 4. 寫回雲端 (這是最容易失敗的地方)
+        conn.update(data=updated_df)
+        
+        # --- 如果跑完上面都沒錯，才執行以下動作 ---
+        st.session_state.translation_history[idx]["參考一建議"] = s_mt
+        st.session_state[f"submitted_mt_{idx}"] = True
+        st.toast("✅ 成功寫入雲端！")
+        st.rerun()
+        
+    except Exception as e:
+        # 這裡是關鍵！它會告訴您是「網路錯誤」、「權限不足」還是「欄位不對」
+        st.error(f"❌ 雲端同步失敗，原因：{str(e)}")
             else:
                 st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的建議！已成功存入記錄。</p>', unsafe_allow_html=True)
 
@@ -452,6 +461,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
