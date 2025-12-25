@@ -356,32 +356,29 @@ if data["參考一評分"] in ["普通", "不佳"]:
             if not st.session_state.get(f"submitted_mt_{idx}", False):
                 s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
                 if s_mt:
-                 if st.button("提交建議資料", key=f"send_mt_{idx}"):
-    # 讀取雲端現有資料 (確保統計數字正確)
-                    try:
-                        existing_data = conn.read(ttl=0)
-                    except:
-                        existing_data = pd.DataFrame()
+                    if st.button("提交建議資料", key=f"send_mt_{idx}"):
+                        # 這裡的 try 必須與上面的代碼保持 4 個空格的對應縮進
+                        try:
+                            existing_data = conn.read(ttl=0)
+                            new_row = pd.DataFrame([{
+                                "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "原文": data["原文"],
+                                "參考一結果": data["參考一結果"],
+                                "參考一評分": data["參考一評分"],
+                                "參考一建議": s_mt,
+                                "參考二結果": data["參考二結果"],
+                                "參考二評分": data.get("參考二評分", ""),
+                                "參考二建議": data.get("參考二建議", "")
+                            }])
+                            updated_df = pd.concat([existing_data, new_row], ignore_index=True)
+                            conn.update(data=updated_df)
+                        except Exception as e:
+                            st.error(f"雲端寫入失敗: {e}")
 
-    new_row = pd.DataFrame([{
-        "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "原文": data["原文"],
-        "參考一結果": data["參考一結果"],
-        "參考一評分": data["參考一評分"],
-        "參考一建議": s_mt, # 這裡使用左側輸入框的內容
-        "參考二結果": data["參考二結果"],
-        "參考二評分": data.get("參考二評分", ""),
-        "參考二建議": data.get("參考二建議", "")
-    }])
-    
-    # 合併並寫回雲端
-    updated_df = pd.concat([existing_data, new_row], ignore_index=True)
-    conn.update(data=updated_df)
-    
-    st.session_state.translation_history[idx]["參考一建議"] = s_mt
-    st.session_state[f"submitted_mt_{idx}"] = True
-    st.toast("✅ 建議一已同步至雲端！")
-    st.rerun()
+                        st.session_state.translation_history[idx]["參考一建議"] = s_mt
+                        st.session_state[f"submitted_mt_{idx}"] = True
+                        st.toast("✅ 建議一已同步至雲端！")
+                        st.rerun()
             else:
                 st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的建議！已成功存入記錄。</p>', unsafe_allow_html=True)
 
@@ -408,30 +405,28 @@ if data["參考二評分"] in ["普通", "不佳"]:
             if not st.session_state.get(f"submitted_gm_{idx}", False):
                 s_gm = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_gm_{idx}")
                 if s_gm:
-if st.button("提交建議資料", key=f"send_gm_{idx}"):
-    try:
-        existing_data = conn.read(ttl=0)
-    except:
-        existing_data = pd.DataFrame()
+                    if st.button("提交建議資料", key=f"send_gm_{idx}"):
+                        try:
+                            existing_data = conn.read(ttl=0)
+                            new_row = pd.DataFrame([{
+                                "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "原文": data["原文"],
+                                "參考一結果": data["參考一結果"],
+                                "參考一評分": data.get("參考一評分", ""),
+                                "參考一建議": data.get("參考一建議", ""),
+                                "參考二結果": data["參考二結果"],
+                                "參考二評分": data["參考二評分"],
+                                "參考二建議": s_gm
+                            }])
+                            updated_df = pd.concat([existing_data, new_row], ignore_index=True)
+                            conn.update(data=updated_df)
+                        except Exception as e:
+                            st.error(f"雲端寫入失敗: {e}")
 
-    new_row = pd.DataFrame([{
-        "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "原文": data["原文"],
-        "參考一結果": data["參考一結果"],
-        "參考一評分": data.get("參考一評分", ""),
-        "參考一建議": data.get("參考一建議", ""),
-        "參考二結果": data["參考二結果"],
-        "參考二評分": data["參考二評分"],
-        "參考二建議": s_gm # 這裡使用右側輸入框的內容
-    }])
-    
-    updated_df = pd.concat([existing_data, new_row], ignore_index=True)
-    conn.update(data=updated_df)
-    
-    st.session_state.translation_history[idx]["參考二建議"] = s_gm
-    st.session_state[f"submitted_gm_{idx}"] = True
-    st.toast("✅ 建議二已同步至雲端！")
-    st.rerun()
+                        st.session_state.translation_history[idx]["參考二建議"] = s_gm
+                        st.session_state[f"submitted_gm_{idx}"] = True
+                        st.toast("✅ 建議二已同步至雲端！")
+                        st.rerun()
             else:
                 st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄。</p>', unsafe_allow_html=True)
 # ==========================================
@@ -443,6 +438,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
