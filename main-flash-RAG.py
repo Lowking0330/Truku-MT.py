@@ -346,7 +346,7 @@ if st.session_state.current_idx is not None:
     col_l, col_r = st.columns(2)
     
     # --- 左側：參考翻譯一 ---
-    with col_l:
+with col_l:
         st.markdown("### 🏗️ 參考翻譯一")
         st.markdown(f'<div class="result-text mt-box">{data["參考一結果"]}</div>', unsafe_allow_html=True)
         
@@ -404,7 +404,7 @@ if data["參考一評分"] in ["普通", "不佳"]:
                             st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的建議！已成功存入記錄。</p>', unsafe_allow_html=True)
 
     # --- 右側：參考翻譯二 ---
-    with col_r:
+with col_r:
             st.markdown("### ✨ 參考翻譯二")
             st.markdown(f'<div class="result-text gemini-box">{data["參考二結果"]}</div>', unsafe_allow_html=True)
         
@@ -459,6 +459,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
