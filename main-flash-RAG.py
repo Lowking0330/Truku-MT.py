@@ -393,8 +393,8 @@ if data["參考一評分"] in ["普通", "不佳"]:
                             updated_df = pd.concat([existing_df, new_row], ignore_index=True)
                             conn.update(data=updated_df)
         
-        # 4. 寫回雲端 (這是最容易失敗的地方)
-        conn.update(data=updated_df)
+                            # 4. 寫回雲端 (這是最容易失敗的地方)
+                            conn.update(data=updated_df)
         
         # --- 如果跑完上面都沒錯，才執行以下動作 ---
         st.session_state.translation_history[idx]["參考一建議"] = s_mt
@@ -464,6 +464,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
