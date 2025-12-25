@@ -1,0 +1,4 @@
+.env
+.streamlit/
+__pycache__/
+*.xlsx (如果您不希望語料庫公開，這行也要加)
