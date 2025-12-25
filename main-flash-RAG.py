@@ -14,13 +14,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_api_key():
-    """安全獲取金鑰：優先讀取 Streamlit Secrets，若無則讀取 .env"""
+    # 優先嘗試讀取 Streamlit Secrets
     try:
-        # 這是為了相容 Streamlit Cloud 的安全機制
-        if "GOOGLE_API_KEY" in st.secrets:
+        if hasattr(st, "secrets") and "GOOGLE_API_KEY" in st.secrets:
             return st.secrets["GOOGLE_API_KEY"]
-    except:
+    except Exception:
         pass
+    
+    # 次要嘗試環境變數 (本地測試用)
     return os.getenv("GOOGLE_API_KEY")
 
 GOOGLE_API_KEY = get_api_key()
@@ -384,4 +385,5 @@ st.markdown("""
     <div class="privacy-box">
         <b>📢 隱私聲明：</b> 您的翻譯請求與回饋將被記錄，僅用於太魯閣語復振與 RAG 系統提升，不會洩漏個人隱私。
     </div>
+
 """, unsafe_allow_html=True)
