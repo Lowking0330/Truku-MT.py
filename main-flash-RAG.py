@@ -444,7 +444,7 @@ with col_r:
                         except Exception as e:
                             st.error(f"雲端寫入失敗: {e}")
 
-                        st.session_state.translation_history[idx]["參考二建議"] = s_gm:
+                        st.session_state.translation_history[idx]["參考二建議"] = s_gm
                         st.session_state[f"submitted_gm_{idx}"] = True
                         st.toast("✅ 建議二已同步至雲端！")
                         st.rerun()
@@ -459,6 +459,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
