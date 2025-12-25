@@ -363,7 +363,7 @@ if st.session_state.current_idx is not None:
                 st.rerun()
 
         # 核心邏輯：當評分為普通或不佳，且「尚未送出建議」時，顯示輸入框
-if data["參考一評分"] in ["普通", "不佳"]:
+    if data["參考一評分"] in ["普通", "不佳"]:
             if not st.session_state.get(f"submitted_mt_{idx}", False):
                 s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
                 if s_mt:
@@ -449,6 +449,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
