@@ -397,10 +397,10 @@ if data["參考一評分"] in ["普通", "不佳"]:
                             conn.update(data=updated_df)
         
         # --- 如果跑完上面都沒錯，才執行以下動作 ---
-        st.session_state.translation_history[idx]["參考一建議"] = s_mt
-        st.session_state[f"submitted_mt_{idx}"] = True
-        st.toast("✅ 成功寫入雲端！")
-        st.rerun()
+                                st.session_state.translation_history[idx]["參考一建議"] = s_mt
+                                st.session_state[f"submitted_mt_{idx}"] = True
+                                st.toast("✅ 成功寫入雲端！")
+                                st.rerun()
         
     except Exception as e:
         # 這裡是關鍵！它會告訴您是「網路錯誤」、「權限不足」還是「欄位不對」
@@ -464,6 +464,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
