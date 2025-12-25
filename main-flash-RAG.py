@@ -442,7 +442,9 @@ if st.session_state.current_idx is not None:
                             st.toast("✅ 建議已記錄並同步至雲端")
                             st.rerun()
                         except Exception as e:
-                            st.error(f"同步出錯：{e}")
+                            st.error(f"同步出錯：{type(e).__name__} - {str(e)}")
+    # 這會告訴我們是哪種類型的錯誤（例如：SpreadsheetNotFound 或 PermissionError）
             else:
                 st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄。</p>', unsafe_allow_html=True)
+
 
