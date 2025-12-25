@@ -221,10 +221,15 @@ st.title("🏔️ 太魯閣族語AI翻譯平臺")
 
 with st.sidebar:
     st.header("📈 社群貢獻看板")
-    # 統計貢獻數
-    total_suggestions = sum(1 for item in st.session_state.translation_history if item.get("參考一建議") or item.get("參考二建議"))
-    st.metric(label="族人累計建議數", value=total_suggestions)
-    st.caption("您的建議將可協助優化 RAG 系統！")
+    try:
+        # 從雲端試算表讀取所有已有的建議
+        existing_data = conn.read(ttl=0) # ttl=0 確保每次都讀取最新資料
+        total_suggestions = len(existing_data)
+    except:
+        total_suggestions = 0
+        
+    st.metric(label="全社群累計建議數", value=total_suggestions)
+    st.caption("這是一個永久累計的數字，感謝您的寶貴！")
     
     st.divider()
     st.header("📋 歷史管理")
@@ -340,14 +345,33 @@ if st.session_state.current_idx is not None:
                 st.rerun()
 
         # 核心邏輯：當評分為普通或不佳，且「尚未送出建議」時，顯示輸入框
-        if data["參考一評分"] in ["普通", "不佳"]:
+if data["參考一評分"] in ["普通", "不佳"]:
             if not st.session_state.get(f"submitted_mt_{idx}", False):
                 s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
                 if s_mt:
                     if st.button("提交建議資料", key=f"send_mt_{idx}"):
+                        # --- 寫入 Google Sheets 邏輯 ---
+                        new_row = pd.DataFrame([{
+                            "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "原文": data["原文"],
+                            "參考一結果": data["參考一結果"],
+                            "參考一評分": data["參考一評分"],
+                            "參考一建議": s_mt,
+                            "參考二結果": data["參考二結果"],
+                            "參考二評分": data.get("參考二評分", ""),
+                            "參考二建議": data.get("參考二建議", "")
+                        }])
+                        # 讀取現有資料並合併寫回
+                        try:
+                            existing_df = conn.read(ttl=0)
+                            updated_df = pd.concat([existing_df, new_row], ignore_index=True)
+                            conn.update(data=updated_df)
+                        except:
+                            conn.create(data=new_row) # 若表單是空的則建立
+
                         st.session_state.translation_history[idx]["參考一建議"] = s_mt
                         st.session_state[f"submitted_mt_{idx}"] = True
-                        st.toast("✅ 建議已記錄")
+                        st.toast("✅ 建議已同步至雲端資料庫！")
                         st.rerun()
             else:
                 st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的建議！已成功存入記錄。</p>', unsafe_allow_html=True)
@@ -371,14 +395,33 @@ if st.session_state.current_idx is not None:
                 st.session_state.translation_history[idx]["參考二評分"] = "不佳"
                 st.rerun()
 
-        if data["參考二評分"] in ["普通", "不佳"]:
+if data["參考二評分"] in ["普通", "不佳"]:
             if not st.session_state.get(f"submitted_gm_{idx}", False):
                 s_gm = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_gm_{idx}")
                 if s_gm:
                     if st.button("提交建議資料", key=f"send_gm_{idx}"):
+                        # --- 寫入 Google Sheets 邏輯 ---
+                        new_row = pd.DataFrame([{
+                            "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "原文": data["原文"],
+                            "參考一結果": data["參考一結果"],
+                            "參考一評分": data.get("參考一評分", ""),
+                            "參考一建議": data.get("參考一建議", ""),
+                            "參考二結果": data["參考二結果"],
+                            "參考二評分": data["參考二評分"],
+                            "參考二建議": s_gm
+                        }])
+                        # 讀取現有資料並合併寫回
+                        try:
+                            existing_df = conn.read(ttl=0)
+                            updated_df = pd.concat([existing_df, new_row], ignore_index=True)
+                            conn.update(data=updated_df)
+                        except:
+                            conn.create(data=new_row)
+
                         st.session_state.translation_history[idx]["參考二建議"] = s_gm
                         st.session_state[f"submitted_gm_{idx}"] = True
-                        st.toast("✅ 建議已記錄")
+                        st.toast("✅ 建議已同步至雲端資料庫！")
                         st.rerun()
             else:
                 st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄。</p>', unsafe_allow_html=True)
@@ -391,4 +434,5 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
