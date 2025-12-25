@@ -261,7 +261,7 @@ with st.sidebar:
     st.header("📈 社群貢獻看板")
     try:
         # ttl=0 是關鍵，它會強制每次都去 Google Sheets 抓最新的
-        existing_data = conn.read(ttl=0) 
+        existing_data = conn.read(ttl="5s") 
         if existing_data is not None:
             total_suggestions = len(existing_data)
         else:
@@ -393,7 +393,7 @@ if st.session_state.current_idx is not None:
                     if st.button("提交建議資料", key=f"send_mt_{idx}"):
                         try:
                             # 讀取並合併資料
-                            existing_df = conn.read(ttl=0)
+                            existing_df = conn.read(ttl="5s")
                             new_row = pd.DataFrame([{
                                 "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                 "原文": data["原文"],
@@ -442,7 +442,7 @@ if st.session_state.current_idx is not None:
                 if s_gm:
                     if st.button("提交建議資料", key=f"send_gm_{idx}"):
                         try:
-                            existing_df = conn.read(ttl=0)
+                            existing_df = conn.read(ttl="5s")
                             new_row = pd.DataFrame([{
                                 "時間": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                                 "原文": data["原文"],
@@ -465,6 +465,7 @@ if st.session_state.current_idx is not None:
     # 這會告訴我們是哪種類型的錯誤（例如：SpreadsheetNotFound 或 PermissionError）
             else:
                 st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄 Mhuway su balay!</p>', unsafe_allow_html=True)
+
 
 
 
