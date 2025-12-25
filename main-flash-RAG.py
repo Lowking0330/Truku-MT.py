@@ -448,7 +448,7 @@ st.session_state.translation_history[idx]["參考二建議"] = s_gm  # 這裡的
 st.session_state[f"submitted_gm_{idx}"] = True
 st.toast("✅ 建議二已同步至雲端！")
 st.rerun()
-                else:
+            else:
                     st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄。</p>', unsafe_allow_html=True)
 # ==========================================
 # 8. 隱私聲明宣告 (底部)
@@ -459,6 +459,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
