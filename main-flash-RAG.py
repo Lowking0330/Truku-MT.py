@@ -399,7 +399,7 @@ if s_mt:
                             st.rerun()
                             
             except Exception as e:
-        st.error(f"❌ 同步失敗：{str(e)}")
+                st.error(f"❌ 同步失敗：{str(e)}")
             else:
                 st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的建議！已成功存入記錄。</p>', unsafe_allow_html=True)
 
@@ -459,6 +459,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
