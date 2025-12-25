@@ -370,8 +370,8 @@ if data["參考一評分"] in ["普通", "不佳"]:
             if not st.session_state.get(f"submitted_mt_{idx}", False):
                 s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
                 # 第 372 行：這是父層 if
-    if s_mt:
-        if st.button("提交建議資料", key=f"send_mt_{idx}"):
+if s_mt:
+    if st.button("提交建議資料", key=f"send_mt_{idx}"):
             try:
                             # 1. 讀取最新雲端資料
                             existing_df = conn.read(ttl=0)
@@ -459,6 +459,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
