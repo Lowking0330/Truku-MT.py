@@ -370,8 +370,8 @@ if st.session_state.current_idx is not None:
             if not st.session_state.get(f"submitted_mt_{idx}", False):
                 s_mt = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_mt_{idx}")
                 if s_mt:
-if st.button("提交建議資料", key=f"send_mt_{idx}"):
-    try:
+                    if st.button("提交建議資料", key=f"send_mt_{idx}"):
+                        try:
         # 1. 抓取最新資料
         existing_df = conn.read(ttl=0)
         
@@ -461,6 +461,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
