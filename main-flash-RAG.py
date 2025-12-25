@@ -3,6 +3,13 @@ from streamlit_gsheets import GSheetsConnection
 # 初始化 Google Sheets 連線
 conn = st.connection("gsheets", type=GSheetsConnection)
 import streamlit as st
+import streamlit as st
+from streamlit_gsheets import GSheetsConnection  # 必須加入這一行！
+import pandas as pd
+from datetime import datetime
+
+# 初始化連線
+conn = st.connection("gsheets", type=GSheetsConnection)
 from google import genai 
 from gradio_client import Client
 import os
@@ -434,5 +441,6 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
