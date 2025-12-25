@@ -27,7 +27,26 @@ GOOGLE_API_KEY = get_api_key()
 # --- 初始化 Google Sheets 連線 ---
 # 確保這一行在 get_api_key 之後，且有加上 type=GSheetsConnection
 conn = st.connection("gsheets", type=GSheetsConnection) 
-
+# ==========================================
+# 4. 側邊欄統計 (更新在此處)
+# ==========================================
+try:
+    # 這裡 ttl=0 是關鍵，確保每次重新整理都會去 Google Sheets 數一次總列數
+    df_for_count = conn.read(ttl=0) 
+    total_contributions = len(df_for_count)
+    
+    with st.sidebar:
+        # 您原本的 logo 或 標題
+        st.markdown("## 📊 統計資訊")
+        st.markdown(f"""
+            <div style="background-color: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #333;">
+                <p style="margin:0; color: #888; font-size: 0.9rem;">📊 社群累積貢獻</p>
+                <h2 style="margin:0; color: #ffbd45;">{total_contributions} <span style="font-size: 1rem;">筆建議</span></h2>
+            </div>
+        """, unsafe_allow_html=True)
+        st.write("---") # 加上分隔線美化
+except Exception as e:
+    st.sidebar.warning("📊 統計資訊：同步中...")
 st.set_page_config(page_title="太魯閣族語AI翻譯平臺", layout="wide")
 
 # ==========================================
@@ -445,6 +464,7 @@ if st.session_state.current_idx is not None:
                             st.error(f"同步出錯：{type(e).__name__} - {str(e)}")
     # 這會告訴我們是哪種類型的錯誤（例如：SpreadsheetNotFound 或 PermissionError）
             else:
-                st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄。</p>', unsafe_allow_html=True)
+                st.markdown('<p style="color: #4caf50; font-weight: bold;">✅ 謝謝您的寶貴建議！已成功記錄 Mhuway su balay!</p>', unsafe_allow_html=True)
+
 
 
