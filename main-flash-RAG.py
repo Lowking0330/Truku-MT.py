@@ -247,7 +247,7 @@ with st.sidebar:
         total_suggestions = 0
         
     st.metric(label="全社群累計建議數", value=total_suggestions)
-    st.caption("這是一個永久累計的數字，感謝您的寶貴！")
+    st.caption("這是一個永久累計的數字，感謝您寶貴的建議！")
     
     st.divider()
     st.header("📋 歷史管理")
@@ -449,6 +449,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
