@@ -4,3 +4,4 @@ gradio_client
 pandas
 openpyxl
 python-dotenv
+st-gsheets-connection
