@@ -412,7 +412,7 @@ if st.session_state.current_idx is not None:
                 st.session_state.translation_history[idx]["參考二評分"] = "不佳"
                 st.rerun()
 
-if data["參考二評分"] in ["普通", "不佳"]:
+    if data["參考二評分"] in ["普通", "不佳"]:
             if not st.session_state.get(f"submitted_gm_{idx}", False):
                 s_gm = st.text_input("💡 請輸入建議的正確翻譯：", key=f"in_gm_{idx}")
                 if s_gm:
@@ -449,6 +449,7 @@ st.markdown("""
     </div>
 
 """, unsafe_allow_html=True)
+
 
 
 
