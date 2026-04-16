@@ -169,12 +169,11 @@ def get_rag_context(query_text):
 @st.cache_resource
 def init_engines():
     try:
-        # 🔑 修正：指向原語會最新的官方主機
+        # 指向原語會最新的官方主機
         mt = Client("https://ai-labs.ilrdf.org.tw/kari-seejiq-tnpusu-ai-hmjil/")
     except: 
         mt = None
         
-    # 🔑 修正：補回完整的 Gemini 初始化與 return 邏輯
     gemini = genai.Client(api_key=GOOGLE_API_KEY) if GOOGLE_API_KEY else None
     return mt, gemini
 
@@ -232,36 +231,37 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
 翻譯結果：
 """
                     try:
-                        resp = GEMINI_CLIENT.models.generate_content(model="gemini-1.5-flash", contents=prompt)
+                        # 💡 乖乖用回你指定的正確模型！
+                        resp = GEMINI_CLIENT.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
                         res_gemini = resp.text.strip()
                     except Exception as e:
-                        # 💡 保留錯誤印出機制，方便除錯
                         st.error(f"🚨 Gemini 發生錯誤，詳細原因：{str(e)}") 
                         res_gemini = "API 錯誤，請看上方紅框"
 
-                # B. 處理意傳 MT (原語會模型)
+                # B. 處理意傳 MT (原語會模型) - 使用位置參數避免 Gradio 報錯
                 try:
                     if MT_CLIENT:
                         if current_mode == "zh_to_truku":
-                            # 華語 ⮕ 太魯閣語 (使用 /translate_1)
+                            # 華語 ⮕ 太魯閣語 (使用 /translate_1，只丟值不寫參數名稱)
                             res_mt = MT_CLIENT.predict(
-                                text=u_text,
-                                src_lang="zho_Hant",
-                                tgt_lang="trv_Truk",
+                                u_text,
+                                "zho_Hant",
+                                "trv_Truk",
                                 api_name="/translate_1"
                             )
                         else:
-                            # 太魯閣語 ⮕ 華語 (使用 /translate)
+                            # 太魯閣語 ⮕ 華語 (使用 /translate，只丟值不寫參數名稱)
                             res_mt = MT_CLIENT.predict(
-                                text=u_text,
-                                src_lang="trv_Truk",
-                                tgt_lang="zho_Hant",
+                                u_text,
+                                "trv_Truk",
+                                "zho_Hant",
                                 api_name="/translate"
                             )
                     else: 
                         res_mt = "未連線"
                 except Exception as e: 
-                    # 加上錯誤訊息，方便未來除錯
+                    # 若依然出錯，強制印出以利排查
+                    st.error(f"🚨 MT 發生錯誤：{str(e)}")
                     res_mt = f"模型伺服器異常 ({str(e)[:15]})"
 
                 st.session_state.translation_history.append({
