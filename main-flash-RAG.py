@@ -173,7 +173,10 @@ def init_engines():
         mt = Client("https://ai-labs.ilrdf.org.tw/kari-seejiq-tnpusu-ai-hmjil/")
     except: 
         mt = None
-    gemini = genai.Clien
+        
+    # 🔑 修正：補回完整的 Gemini 初始化與 return 邏輯
+    gemini = genai.Client(api_key=GOOGLE_API_KEY) if GOOGLE_API_KEY else None
+    return mt, gemini
 
 MT_CLIENT, GEMINI_CLIENT = init_engines()
 
@@ -229,14 +232,14 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
 翻譯結果：
 """
                     try:
-                        resp = GEMINI_CLIENT.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                        resp = GEMINI_CLIENT.models.generate_content(model="gemini-1.5-flash", contents=prompt)
                         res_gemini = resp.text.strip()
                     except Exception as e:
-                        # 💡 這一行是關鍵！我們強制把錯誤訊息印在網頁上，不讓 Streamlit 遮蔽
+                        # 💡 保留錯誤印出機制，方便除錯
                         st.error(f"🚨 Gemini 發生錯誤，詳細原因：{str(e)}") 
                         res_gemini = "API 錯誤，請看上方紅框"
 
-# B. 處理意傳 MT (原語會模型)
+                # B. 處理意傳 MT (原語會模型)
                 try:
                     if MT_CLIENT:
                         if current_mode == "zh_to_truku":
@@ -260,6 +263,14 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                 except Exception as e: 
                     # 加上錯誤訊息，方便未來除錯
                     res_mt = f"模型伺服器異常 ({str(e)[:15]})"
+
+                st.session_state.translation_history.append({
+                    "時間": datetime.now().strftime("%H:%M:%S"), "原文": u_text, 
+                    "參考一結果": res_mt, "參考一評分": "", "參考一建議": "",
+                    "參考二結果": res_gemini, "參考二來源": gemini_source, "參考二評分": "", "參考二建議": ""
+                })
+                st.session_state.translation_cache[cache_key] = {'mt': res_mt, 'gemini': res_gemini}
+                st.session_state.current_idx = len(st.session_state.translation_history) - 1
 
 # ==========================================
 # 6. 持久渲染區：結果顯示與回饋建議
