@@ -169,11 +169,11 @@ def get_rag_context(query_text):
 @st.cache_resource
 def init_engines():
     try:
-        mt = Client("ithuan/formosan-translation")
-        mt.timeout = 90
-    except: mt = None
-    gemini = genai.Client(api_key=GOOGLE_API_KEY) if GOOGLE_API_KEY else None
-    return mt, gemini
+        # 🔑 修正：指向原語會最新的官方主機
+        mt = Client("https://ai-labs.ilrdf.org.tw/kari-seejiq-tnpusu-ai-hmjil/")
+    except: 
+        mt = None
+    gemini = genai.Clien
 
 MT_CLIENT, GEMINI_CLIENT = init_engines()
 
