@@ -228,9 +228,13 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
 待翻譯內容：              {u_text}
 翻譯結果：
 """
-                    # 💡 這裡拿掉了 try except 防護罩，為了讓錯誤訊息直接印出來
-                    resp = GEMINI_CLIENT.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
-                    res_gemini = resp.text.strip()
+                try:
+                        resp = GEMINI_CLIENT.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                        res_gemini = resp.text.strip()
+                    except Exception as e:
+                        # 💡 這一行是關鍵！我們強制把錯誤訊息印在網頁上，不讓 Streamlit 遮蔽
+                        st.error(f"🚨 Gemini 發生錯誤，詳細原因：{str(e)}") 
+                        res_gemini = "API 錯誤，請看上方紅框"
 
                 # B. 處理意傳 MT
                 try:
