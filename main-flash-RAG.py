@@ -228,7 +228,7 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
 待翻譯內容：              {u_text}
 翻譯結果：
 """
-                try:
+                    try:
                         resp = GEMINI_CLIENT.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
                         res_gemini = resp.text.strip()
                     except Exception as e:
