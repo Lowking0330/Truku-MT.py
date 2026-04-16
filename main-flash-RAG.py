@@ -236,23 +236,30 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                         st.error(f"🚨 Gemini 發生錯誤，詳細原因：{str(e)}") 
                         res_gemini = "API 錯誤，請看上方紅框"
 
-                # B. 處理意傳 MT
+# B. 處理意傳 MT (原語會模型)
                 try:
                     if MT_CLIENT:
-                        if st.session_state.last_api_mode != current_mode:
-                            MT_CLIENT.predict(ethnicity="太魯閣", api_name="/lambda_1" if current_mode == "zh_to_truku" else "/lambda")
-                            st.session_state.last_api_mode = current_mode
-                        res_mt = MT_CLIENT.predict(u_text, "zho_Hant", "trv_Truk", api_name="/translate_1" if current_mode == "zh_to_truku" else "/translate")
-                    else: res_mt = "未連線"
-                except: res_mt = "伺服器忙碌"
-
-                st.session_state.translation_history.append({
-                    "時間": datetime.now().strftime("%H:%M:%S"), "原文": u_text, 
-                    "參考一結果": res_mt, "參考一評分": "", "參考一建議": "",
-                    "參考二結果": res_gemini, "參考二來源": gemini_source, "參考二評分": "", "參考二建議": ""
-                })
-                st.session_state.translation_cache[cache_key] = {'mt': res_mt, 'gemini': res_gemini}
-                st.session_state.current_idx = len(st.session_state.translation_history) - 1
+                        if current_mode == "zh_to_truku":
+                            # 華語 ⮕ 太魯閣語 (使用 /translate_1)
+                            res_mt = MT_CLIENT.predict(
+                                text=u_text,
+                                src_lang="zho_Hant",
+                                tgt_lang="trv_Truk",
+                                api_name="/translate_1"
+                            )
+                        else:
+                            # 太魯閣語 ⮕ 華語 (使用 /translate)
+                            res_mt = MT_CLIENT.predict(
+                                text=u_text,
+                                src_lang="trv_Truk",
+                                tgt_lang="zho_Hant",
+                                api_name="/translate"
+                            )
+                    else: 
+                        res_mt = "未連線"
+                except Exception as e: 
+                    # 加上錯誤訊息，方便未來除錯
+                    res_mt = f"模型伺服器異常 ({str(e)[:15]})"
 
 # ==========================================
 # 6. 持久渲染區：結果顯示與回饋建議
