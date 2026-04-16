@@ -181,6 +181,7 @@ if 'translation_history' not in st.session_state: st.session_state.translation_h
 if 'translation_cache' not in st.session_state: st.session_state.translation_cache = {}
 if 'current_idx' not in st.session_state: st.session_state.current_idx = None
 if 'last_api_mode' not in st.session_state: st.session_state.last_api_mode = None
+
 # ==========================================
 # 5. 主介面與翻譯執行邏輯
 # ==========================================
@@ -227,10 +228,9 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
 待翻譯內容：              {u_text}
 翻譯結果：
 """
-                    try:
-                        resp = GEMINI_CLIENT.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
-                        res_gemini = resp.text.strip()
-                    except: res_gemini = "Gemini 服務繁忙"
+                    # 💡 這裡拿掉了 try except 防護罩，為了讓錯誤訊息直接印出來
+                    resp = GEMINI_CLIENT.models.generate_content(model="gemini-3-flash-preview", contents=prompt)
+                    res_gemini = resp.text.strip()
 
                 # B. 處理意傳 MT
                 try:
