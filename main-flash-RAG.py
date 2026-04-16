@@ -238,11 +238,16 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                         st.error(f"🚨 Gemini 發生錯誤，詳細原因：{str(e)}") 
                         res_gemini = "API 錯誤，請看上方紅框"
 
-                # B. 處理意傳 MT (原語會模型) - 使用位置參數避免 Gradio 報錯
+# B. 處理意傳 MT (原語會模型) - 乖乖先切換選單再翻譯
                 try:
                     if MT_CLIENT:
                         if current_mode == "zh_to_truku":
-                            # 華語 ⮕ 太魯閣語 (使用 /translate_1，只丟值不寫參數名稱)
+                            # 1. 先呼叫 lambda_1 告訴伺服器：我要切換到太魯閣族
+                            if st.session_state.last_api_mode != current_mode:
+                                MT_CLIENT.predict("太魯閣", api_name="/lambda_1")
+                                st.session_state.last_api_mode = current_mode
+                            
+                            # 2. 選單切換好後，再送出翻譯請求
                             res_mt = MT_CLIENT.predict(
                                 u_text,
                                 "zho_Hant",
@@ -250,7 +255,12 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                                 api_name="/translate_1"
                             )
                         else:
-                            # 太魯閣語 ⮕ 華語 (使用 /translate，只丟值不寫參數名稱)
+                            # 1. 先呼叫 lambda 告訴伺服器：我要切換到太魯閣族
+                            if st.session_state.last_api_mode != current_mode:
+                                MT_CLIENT.predict("太魯閣", api_name="/lambda")
+                                st.session_state.last_api_mode = current_mode
+                                
+                            # 2. 選單切換好後，再送出翻譯請求
                             res_mt = MT_CLIENT.predict(
                                 u_text,
                                 "trv_Truk",
@@ -260,7 +270,6 @@ if st.button("🚀 啟動翻譯對照", use_container_width=True, type="secondar
                     else: 
                         res_mt = "未連線"
                 except Exception as e: 
-                    # 若依然出錯，強制印出以利排查
                     st.error(f"🚨 MT 發生錯誤：{str(e)}")
                     res_mt = f"模型伺服器異常 ({str(e)[:15]})"
 
